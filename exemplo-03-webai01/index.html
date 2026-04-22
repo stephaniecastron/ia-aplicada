@@ -1,0 +1,48 @@
+<output id="output"></output>
+<script src="https://cdn.jsdelivr.net/npm/markdown@0.5.0/lib/markdown.min.js"></script>
+
+<script>
+    const output = document.getElementById('output');
+
+    (async () => {
+        const availability = await LanguageModel.availability({
+            // The same options in `prompt()` or `promptStreaming()`
+        });
+        console.log(availability);
+        // const params = await LanguageModel.params()
+
+        // console.log(params);
+        const initialPrompts = [
+            {
+                role: 'system',
+                content: 'Você é um assistente de IA que responde de forma clara e objetiva.'
+            }
+        ]
+
+        const question = 'Quem inventou o JavaScript?';
+
+        output.innerHTML = 'Gerando resposta...';
+
+        const session = await LanguageModel.create({
+            languages: ['pt-BR'],
+            initialPrompts,
+        })
+
+        const responseStreaming = await session.promptStreaming([
+            {
+                role: 'user',
+                content: question
+            }
+        ]);
+
+        output.innerHTML = '';
+        let fullTest = '';
+
+        for await (const token of responseStreaming) {
+            // console.log(token);
+            fullTest += token;
+            output.innerHTML = markdown.toHTML(fullTest);
+        }
+
+    })();
+</script>
